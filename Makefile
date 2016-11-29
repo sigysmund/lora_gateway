@@ -1,6 +1,6 @@
 ### Environment constants 
 
-ARCH ?=
+ARCH ?= arm
 CROSS_COMPILE ?=
 export
 
