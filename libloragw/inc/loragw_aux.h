@@ -7,7 +7,7 @@
   (C)2013 Semtech-Cycleo
 
 Description:
-	LoRa concentrator HAL common auxiliary functions
+    LoRa concentrator HAL common auxiliary functions
 
 License: Revised BSD License, see LICENSE.TXT file include in the project
 Maintainer: Sylvain Miermont
@@ -20,7 +20,19 @@ Maintainer: Sylvain Miermont
 /* -------------------------------------------------------------------------- */
 /* --- DEPENDANCIES --------------------------------------------------------- */
 
-#include "config.h"	/* library configuration options (dynamically generated) */
+#include "config.h"    /* library configuration options (dynamically generated) */
+
+/* -------------------------------------------------------------------------- */
+/* --- PUBLIC MACROS -------------------------------------------------------- */
+
+/**
+@brief Get a particular bit value from a byte
+@param b [in]   Any byte from which we want a bit value
+@param p [in]   Position of the bit in the byte [0..7]
+@param n [in]   Number of bits we want to get
+@return The value corresponding the requested bits
+*/
+#define TAKE_N_BITS_FROM(b, p, n) (((b) >> (p)) & ((1 << (n)) - 1))
 
 /* -------------------------------------------------------------------------- */
 /* --- PUBLIC FUNCTIONS PROTOTYPES ------------------------------------------ */

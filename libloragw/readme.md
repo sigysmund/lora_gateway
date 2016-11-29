@@ -21,15 +21,18 @@ radio used to send and receive packets wirelessly using LoRa or FSK modulations.
 2. Components of the library
 ----------------------------
 
-The library is composed of 5 modules:
+The library is composed of 6(8) modules:
 
 * loragw_hal
 * loragw_reg
 * loragw_spi
 * loragw_aux
 * loragw_gps
+* loragw_radio
+* loragw_fpga (only for SX1301AP2 ref design)
+* loragw_lbt (only for SX1301AP2 ref design)
 
-The library also contains 4 test programs to demonstrate code use and check
+The library also contains basic test programs to demonstrate code use and check
 functionality.
 
 ### 2.1. loragw_hal ###
@@ -160,6 +163,104 @@ Then, in other threads, you can simply used that continuously adjusted time
 reference to convert internal timestamps to UTC time (using lgw_cnt2utc) or 
 the other way around (using lgw_utc2cnt).
 
+### 2.6. loragw_radio ###
+
+This module contains functions to handle the configuration of SX125x and
+SX127x radios.
+
+### 2.7. loragw_fpga ###
+
+This module contains the description of the FPGA registers, the functions to
+read/write those registers, and a function to configure the FPGA features.
+
+This module is only required for SX1301AP2 reference design.
+
+### 2.8. loragw_lbt ###
+
+This module contains functions to configure and use the "Listen-Before-Talk"
+feature (refered as LBT below). It depends on the loragw_fpga and loragw_radio
+modules.
+
+LBT feature is only available on SX1301AP2 reference design, which provides the
+FPGA and the SX127x radio required to accomplish the feature.
+
+The FPGA implements the following Finite State Machine (FSM) to scan the defined
+LBT channels (8 max), and also compute the RSSI histogram for spectral scan,
+using the SX127x radio.
+
+
+                          +-------+
+      +------------------>+ idle  +------------------+
+      |                   +-------+                  v
+      |                       |                +-----------+
+      |                       |                | clean mem |
+      |                       v                +-----------+
+      |                  +----------+                |
+      |                  | set freq |<---------------+
+      |                  +----------+
+      |                       |
+      |                       v
+      |                  +----------+
+      |                  | wait pll |
+      |                  |   lock   |
+      |                  +----------+
+      |                       |                (SCAN_CHANNEL)
+      |                       v                +-----------+
+      |                 +-----------+          |           |
+      |                 |           +----------+           v
+      |             +-->| read RSSI |                +------------+
+      |             |   |           +<---------------+ calc histo |
+      |             |   +-----------+   SCANNING     +------------+
+      |             |         |                            |
+      |    SCANNING |         | (LBT_CHANNEL)              |
+      |             |         v                            |
+      |             |  +-------------+                     |
+      |             |  |   compare   |                     |
+      |             +--+     with    |                     |
+      |                | RSSI_TARGET |          HISTO_DONE |
+      |                +-------------+                     |
+      |                       |                            |
+      |             SCAN DONE |                            |
+      |                       v                            |
+      |                 +------------+                     |
+      |                 |  increase  |                     |
+      +-----------------+            +<--------------------+
+                        |    freq    |
+                        +------------+
+
+
+
+In order to configure the LBT, the following parameters have to be set:
+- RSSI_TARGET: signal strength target used to detect if the channel is clear
+               or not.
+               RSSI_TARGET_dBm = -RSSI_TARGET/2
+- LBT_CHx_FREQ_OFFSET: with x=[0..7], offset from the predefined LBT start
+                       frequency (863MHz or 915MHz depending on FPGA image),
+                       in 100KHz unit.
+- LBT_SCAN_TIME_CHx: with x=[0..7], the channel scan time to be used for this
+                     LBT channel: 128µs or 5000µs
+
+With this FSM, the FPGA keeps the last instant when each channel was free during
+more than LBT_SCAN_TIME_CHx µs.
+
+Then, the HAL, when receiving a downlink request, will first determine on which
+LBT channel this downlink is supposed to be sent and then checks if the channel
+is busy or if downlink is allowed.
+
+In order to determine if a downlink is allowed or not, the HAL does:
+- read the LBT_TIMESTAMP_CH of the channel on which downlink is requested. This
+  gives the last time when channel was free (LBT_TIME).
+- compute the time on air of the downlink packet to determine the end time of
+  the packet emission (PKT_END_TIME).
+- if ((PKT_END_TIME - LBT_TIME) < TX_MAX_TIME)
+    ALLOWED = TRUE
+  else
+    ALLOWED = FALSE
+  endif
+    where TX_MAX_TIME is the maximum time allowed to send a packet since the
+    last channel free time (this depends on the channel scan time ).
+
+
 3. Software build process
 --------------------------
 
@@ -276,7 +377,6 @@ For a typical application you need to:
 * include loragw_hal.h in your program source
 * link to the libloragw.a static library during compilation
 * link to the librt library due to loragw_aux dependencies (timing functions)
-* link to the libmpsse library if you use a FTDI SPI-over-USB bridge
 
 For an application that will also access the concentrator configuration 
 registers directly (eg. for advanced configuration) you also need to:
