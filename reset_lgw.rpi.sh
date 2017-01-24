@@ -18,7 +18,7 @@ else
     RPI_SX1301_RESET_PIN=$2
 fi
 
-echo "Accessing concentrator reset pin through GPIO$IOT_SK_SX1301_RESET_PIN..."
+echo "Accessing concentrator reset pin through GPIO$RPI_SX1301_RESET_PIN..."
 
 WAIT_GPIO() {
     sleep 0.1
