@@ -6,8 +6,7 @@
 #	- writes 1 and 0 on PIN
 #
 # Usage examples:
-#       ./reset_lgw.rpi.sh stop
-#       ./reset_lgw.rpi.sh start
+#       ./reset_lgw.rpi.sh
 
 # The reset pin of SX1301 is wired with RPi BCM25(wPi:6)
 # If used on another platform, the GPIO number can be given as parameter.
