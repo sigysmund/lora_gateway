@@ -14,9 +14,9 @@
 
 GPIO='/usr/bin/gpio'
 if [ -z "$2" ]; then 
-    IOT_SK_SX1301_RESET_PIN=6
+    RPI_SX1301_RESET_PIN=6
 else
-    IOT_SK_SX1301_RESET_PIN=$2
+    RPI_SX1301_RESET_PIN=$2
 fi
 
 echo "Accessing concentrator reset pin through GPIO$IOT_SK_SX1301_RESET_PIN..."
@@ -25,34 +25,18 @@ WAIT_GPIO() {
     sleep 0.1
 }
 
-iot_rpi_init() {
+iot_rpi_reset() {
     # set GPIO  as output
-    $GPIO mode 6 out; WAIT_GPIO
+    $GPIO mode $RPI_SX1301_RESET_PIN out; WAIT_GPIO
 
     # write output for SX1301 reset
-    $GPIO write 1; WAIT_GPIO
-    $GPIO write 0; WAIT_GPIO
+    $GPIO write $RPI_SX1301_RESET_PIN 1; WAIT_GPIO
+    $GPIO write $RPI_SX1301_RESET_PIN 0; WAIT_GPIO
 
     # set GPIO as input
-    $GPIO mode 6 in; WAIT_GPIO
+    $GPIO mode $RPI_SX1301_RESET_PIN in; WAIT_GPIO
 }
 
-iot_rpi_term() {
-    # cleanup GPIO
-}
-
-case "$1" in
-    start)
-    iot_rpi_term
-    iot_rpi_init
-    ;;
-    stop)
-    iot_rpi_term
-    ;;
-    *)
-    echo "Usage: $0 {start|stop} [<gpio number>]"
-    exit 1
-    ;;
-esac
+iot_rpi_reset
 
 exit 0
