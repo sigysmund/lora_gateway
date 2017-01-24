@@ -203,7 +203,7 @@ int main( int argc, char ** argv )
     /* Start message */
     printf("+++ Start spectral scan of LoRa gateway channels +++\n");
 
-    x = lgw_connect(true, 0); /* SPI only, no FPGA reset/configure (for now) */
+    x = lgw_connect(false, 0); /* SPI only, no FPGA reset/configure (for now) */
     if(x != 0) {
         printf("ERROR: Failed to connect to FPGA\n");
         return EXIT_FAILURE;
