@@ -48,6 +48,10 @@ Maintainer: Sylvain Miermont
 #define BUFF_SIZE               1024 /* maximum number of bytes that we can write in sx1301 RX data buffer */
 #define DEFAULT_TX_NOTCH_FREQ   129E3
 
+// SPI Only - reset NOTCH_FREQ to 0
+#undef DEFAULT_TX_NOTCH_FREQ
+#define DEFAULT_TX_NOTCH_FREQ 0
+
 /* -------------------------------------------------------------------------- */
 /* --- PRIVATE VARIABLES (GLOBAL) ------------------------------------------- */
 
@@ -140,7 +144,7 @@ int main(int argc, char **argv)
     sigaction(SIGTERM, &sigact, NULL);
 
     /* start SPI link */
-    i = lgw_connect(false, DEFAULT_TX_NOTCH_FREQ);
+    i = lgw_connect(true, DEFAULT_TX_NOTCH_FREQ);
     if (i != LGW_REG_SUCCESS) {
         MSG("ERROR: lgw_connect() did not return SUCCESS");
         return EXIT_FAILURE;
