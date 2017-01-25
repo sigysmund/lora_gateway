@@ -8,12 +8,12 @@
 # Usage examples:
 #       ./reset_gps.rpi.sh
 
-# The reset pin of SX1301 is wired with RPi BCM25(wPi:4)
+# The reset pin of nGPS_Reset is wired with RPi BCM24(wPi:5)
 # If used on another platform, the GPIO number can be given as parameter.
 
 GPIO='/usr/bin/gpio'
 if [ -z "$2" ]; then 
-    RPI_SX1301_RESET_PIN=4
+    RPI_SX1301_RESET_PIN=5
 else
     RPI_SX1301_RESET_PIN=$2
 fi
@@ -24,7 +24,7 @@ WAIT_GPIO() {
     sleep 0.1
 }
 
-iot_rpi_reset() {
+gps_rpi_reset() {
     # set GPIO  as output
     $GPIO mode $RPI_SX1301_RESET_PIN out; WAIT_GPIO
 
@@ -36,6 +36,6 @@ iot_rpi_reset() {
     $GPIO mode $RPI_SX1301_RESET_PIN in; WAIT_GPIO
 }
 
-iot_rpi_reset
+gps_rpi_reset
 
 exit 0
