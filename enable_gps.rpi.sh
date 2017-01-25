@@ -30,10 +30,6 @@ gps_rpi_enable() {
 
     # write output for SX1301 ENABLE
     $GPIO write $RPI_GPS_ENABLE_PIN 1; WAIT_GPIO
-    $GPIO write $RPI_GPS_ENABLE_PIN 0; WAIT_GPIO
-
-    # set GPIO as input
-    $GPIO mode $RPI_GPS_ENABLE_PIN in; WAIT_GPIO
 }
 
 gps_rpi_enable
