@@ -170,7 +170,7 @@ int main(int argc, char **argv)
     sigaction(SIGTERM, &sigact, NULL);
 
     /* Connect to concentrator */
-    i = lgw_connect(false, LGW_DEFAULT_NOTCH_FREQ);
+    i = lgw_connect(true, LGW_DEFAULT_NOTCH_FREQ);
     if (i != LGW_REG_SUCCESS) {
         MSG("ERROR: lgw_connect() did not return SUCCESS\n");
         return EXIT_FAILURE;
